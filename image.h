@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct
+typedef struct RGB
 {
     uint8_t r;
     uint8_t g;

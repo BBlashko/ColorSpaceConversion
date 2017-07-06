@@ -1,7 +1,7 @@
 #include "image.h"
 
 //Allocates the memory for the image RGB pixel matrix
-RGB** allocate_rbg_matrix(int width, int height)
+RGB** allocate_rgb_matrix(int width, int height)
 {
     RGB** matrix;
     int i;
@@ -76,7 +76,7 @@ BMP_Header read_header_info(FILE* file)
 
 RGB** load_image(FILE* file, int width, int height)
 {
-    RGB** matrix = allocate_rbg_matrix(width, height);
+    RGB** matrix = allocate_rgb_matrix(width, height);
 
     int i,j;
     RGB tmp;
