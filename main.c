@@ -10,34 +10,6 @@
 #include <stdint.h>
 #include "image.h"
 
-/* Header File Options */
-typedef struct YCC
-{
-    float y;
-    float cb;
-    float cr;
-} YCC;
-
-//Allocates the memory for the image RGB pixel matrix
-YCC** allocate_ycc_matrix(int width, int height)
-{
-    YCC** matrix;
-    int i;
-    matrix = (YCC **) malloc (sizeof (YCC*) * height);
-    if (matrix == NULL){
-        perror("[ERROR] No memory available for allocation of RGB matrix!");
-        exit(0);
-    }
-    for (i=0;i<height;i++){
-        matrix[i] = (YCC *) malloc (sizeof(YCC) * width);
-        if (matrix[i] == NULL){
-        perror("[Error] No more memory available for each RGB row allocation!");
-            exit(0);
-        }
-    }
-    return matrix;
-}
-
 /* Main Functionality */
 // Convert 1 RBG pixel to 1 YCC pixel, storing that YCC pixel in a YCC matrix
 YCC** rgb_to_ycc(RGB** rgb_matrix, int width, int height){
@@ -45,9 +17,11 @@ YCC** rgb_to_ycc(RGB** rgb_matrix, int width, int height){
     YCC ycc_pixel;
     RGB rgb_pixel;
 
+
+
     int i, j;
-    for(i = 0; i < width; i++){
-        for(j = 0; j < height; j++){
+    for(i = 0; i < height; i++){
+        for(j = 0; j < width; j++){
             // Read in an RGB pixel
             rgb_pixel = rgb_matrix[i][j];
 
@@ -56,7 +30,9 @@ YCC** rgb_to_ycc(RGB** rgb_matrix, int width, int height){
             ycc_pixel.cb = 128 - (0.148*rgb_pixel.r) - (0.291*rgb_pixel.g) + (0.439*rgb_pixel.b);
             ycc_pixel.cr = 128 + (0.439*rgb_pixel.r) - (0.368*rgb_pixel.g) - (0.071*rgb_pixel.b);
 
+            // printf("%d %d\n", i, j);
             ycc_matrix[i][j] = ycc_pixel;
+
         }
     }
     return ycc_matrix;
@@ -76,8 +52,8 @@ RGB** ycc_to_rgb(YCC** ycc_matrix, int width, int height){
     RGB rgb_pixel;
 
     int i, j;
-    for(i = 0; i < width; i++){
-        for(j = 0; j < height; j++){
+    for(i = 0; i < height; i++){
+        for(j = 0; j < width; j++){
             // Read in a YCC pixel
             ycc_pixel = ycc_matrix[i][j];
 
@@ -139,6 +115,7 @@ int main(int argc, char **argv)
     file = fopen(argv[1], "r");
     image_info = read_header_info(file);
     RGB** rgb_matrix = load_image(file, image_info.width, image_info.height);
+    RGB** rgb_matrix2 = allocate_rgb_matrix(file, image_info.width, image_info.height);
     YCC** ycc_matrix = allocate_ycc_matrix(image_info.width, image_info.height);
 
     //test pixel
@@ -146,12 +123,15 @@ int main(int argc, char **argv)
 
     printf("Converting RGB matrix to YCC matrix\n");
     ycc_matrix = rgb_to_ycc(rgb_matrix, image_info.width, image_info.height);
+    printf("Converting YCC matrix to RGB matrix\n");
+    rgb_matrix2 = ycc_to_rgb(ycc_matrix, image_info.width, image_info.height);
 
-    //printf("Converting YCC matrix to RBG matrix\n");
-    //rgb_matrix = ycc_to_rgb(ycc_matrix, image_info.width, image_info.height);
+    save_YCC_image("trainYCC.bmp", image_info, ycc_matrix, 1);
+    save_RGB_image("trainRGB.bmp", image_info, rgb_matrix2);
     fclose(file);
 
     free(rgb_matrix);
+    free(rgb_matrix2);
     free(ycc_matrix);
     return 0;
 }

@@ -20,6 +20,28 @@ RGB** allocate_rgb_matrix(int width, int height)
     return matrix;
 }
 
+//Allocates the memory for the image YCC pixel matrix
+YCC** allocate_ycc_matrix(int width, int height)
+{
+    YCC** matrix;
+    int i;
+    matrix = (YCC **) malloc (sizeof (YCC*) * height);
+    if (matrix == NULL){
+        perror("[ERROR] No memory available for allocation of RGB matrix!");
+        exit(0);
+    }
+    for (i=0;i<height;i++){
+        matrix[i] = (YCC *) malloc (sizeof(YCC) * width);
+        if (matrix[i] == NULL){
+        perror("[Error] No more memory available for each RGB row allocation!");
+            exit(0);
+        }
+    }
+
+    return matrix;
+}
+
+
 BMP_Header read_header_info(FILE* file)
 {
     BMP_Header info;
@@ -99,14 +121,7 @@ RGB** load_image(FILE* file, int width, int height)
     return matrix;
 }
 
-void save_image(char* filename, BMP_Header header, RGB** rgb_matrix) {
-    char *result = malloc(strlen("saved_images/")+strlen(filename)+1);//+1 for the zero-terminator
-    //in real code you would check for errors in malloc here
-    strcpy(result, "saved_images/");
-    strcat(result, filename);
-
-    FILE* file = fopen(result, "wb");;
-
+void save_image_header(FILE* file, BMP_Header header) {
     //write file header
     unsigned char bmpfileheader[14] = {'B', 'M', 0, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0 ,0};
     bmpfileheader[2] = (unsigned char) (header.filesize);
@@ -152,6 +167,15 @@ void save_image(char* filename, BMP_Header header, RGB** rgb_matrix) {
     bmpinfoheader[39] = (unsigned char) (header.impcolours >> 24);
 
     fwrite (bmpinfoheader, 1, 40, file);
+}
+
+void save_RGB_image(char* filename, BMP_Header header, RGB** rgb_matrix) {
+    char *result = malloc(strlen("saved_images/")+strlen(filename)+1);
+    strcpy(result, "saved_images/");
+    strcat(result, filename);
+
+    FILE* file = fopen(result, "wb");;
+    save_image_header(file, header);
 
     //pixel information
     int i,j;
@@ -164,4 +188,73 @@ void save_image(char* filename, BMP_Header header, RGB** rgb_matrix) {
     }
 
     fclose(file);
+}
+
+void save_YCC_image(char* filename, BMP_Header header, YCC** ycc_matrix, int save_into_components) {
+    char *result = malloc(strlen("saved_images/")+strlen(filename)+1);
+    strcpy(result, "saved_images/");
+    strcat(result, filename);
+
+    FILE* file;
+    FILE* fileY;
+    FILE* fileCb;
+    FILE* fileCr;
+
+    file = fopen(result, "wb");;
+    save_image_header(file, header);
+
+    if (save_into_components) {
+        char *resultY = malloc(strlen(result)+strlen("Y")+1);
+        strcpy(resultY, result);
+        strcat(resultY, "Y");
+
+        char *resultCb = malloc(strlen(result)+strlen("Cb")+1);
+        strcpy(resultCb, result);
+        strcat(resultCb, "Cb");
+
+        char *resultCr = malloc(strlen(result)+strlen("Cr")+1);
+        strcpy(resultCr, result);
+        strcat(resultCr, "Cr");
+
+        fileY = fopen(resultY, "wb");;
+        save_image_header(fileY, header);
+
+        fileCb = fopen(resultCb, "wb");;
+        save_image_header(fileCb, header);
+
+        fileCr = fopen(resultCr, "wb");;
+        save_image_header(fileCr, header);
+    }
+
+    //pixel information
+    int i,j;
+    for (i = 0; i < header.height; i++){
+        for (j = 0; j < header.width; j++){
+            YCC ycc = ycc_matrix[i][j];
+            unsigned char color[3] = { (unsigned char) ycc.cr, (unsigned char) ycc.cb, (unsigned char) ycc.y };
+            fwrite(color, 1, 3, file);
+
+            if (save_into_components) {
+                color[0] = (unsigned char) 0;
+                color[1] = (unsigned char) 0;
+                color[2] = (unsigned char) ycc.y;
+                fwrite(color, 1, 3, fileY);
+
+                color[1] = (unsigned char) ycc.cb;
+                color[2] = (unsigned char) 0;
+                fwrite(color, 1, 3, fileCb);
+
+                color[0] = (unsigned char) ycc.cr;
+                color[1] = (unsigned char) 0;
+                fwrite(color, 1, 3, fileCr);
+            }
+        }
+    }
+
+    fclose(file);
+    if (save_into_components) {
+        fclose(fileY);
+        fclose(fileCb);
+        fclose(fileCr);
+    }
 }
