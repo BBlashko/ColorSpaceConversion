@@ -149,6 +149,7 @@ int main(int argc, char **argv)
 
     //printf("Converting YCC matrix to RBG matrix\n");
     //rgb_matrix = ycc_to_rgb(ycc_matrix, image_info.width, image_info.height);
+    fclose(file);
 
     free(rgb_matrix);
     free(ycc_matrix);

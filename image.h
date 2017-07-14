@@ -15,15 +15,12 @@ typedef struct RGB
 
 typedef struct
 {
-    unsigned int size;
+    unsigned int filesize;
     int width;
     int height;
-    unsigned short int planes;
     unsigned short int bpp;
     unsigned int compression;
     unsigned int imagesize;
-    int xresolution;
-    int yresolution;
     unsigned int colours;
     unsigned int impcolours;
 } BMP_Header;
@@ -31,5 +28,6 @@ typedef struct
 RGB** allocate_rbg_matrix(int width, int height);
 BMP_Header read_header_info(FILE* file);
 RGB** load_image(FILE* file, int width, int height);
+void save_image(char * filename, BMP_Header header, RGB** rgb_matrix);
 
 #endif

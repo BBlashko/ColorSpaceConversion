@@ -32,6 +32,9 @@ BMP_Header read_header_info(FILE* file)
       printf("\nThe file is not in BMP format.\n");
     }
 
+    fseek(file, 2, 0);
+    fread(&info.filesize, 1, 4, file);
+
     fseek(file, 18, 0);
 
     // Image Width and height
@@ -94,4 +97,71 @@ RGB** load_image(FILE* file, int width, int height)
         }
     }
     return matrix;
+}
+
+void save_image(char* filename, BMP_Header header, RGB** rgb_matrix) {
+    char *result = malloc(strlen("saved_images/")+strlen(filename)+1);//+1 for the zero-terminator
+    //in real code you would check for errors in malloc here
+    strcpy(result, "saved_images/");
+    strcat(result, filename);
+
+    FILE* file = fopen(result, "wb");;
+
+    //write file header
+    unsigned char bmpfileheader[14] = {'B', 'M', 0, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0 ,0};
+    bmpfileheader[2] = (unsigned char) (header.filesize);
+    bmpfileheader[3] = (unsigned char) (header.filesize >> 8);
+    bmpfileheader[4] = (unsigned char) (header.filesize >> 16);
+    bmpfileheader[5] = (unsigned char) (header.filesize >> 24);
+
+    fwrite (bmpfileheader, 1, 14, file);
+
+    //write info header
+    unsigned char bmpinfoheader[40] = {40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 24, 0};
+    bmpinfoheader[4] = (unsigned char) (header.width);
+    bmpinfoheader[5] = (unsigned char) (header.width >> 8);
+    bmpinfoheader[6] = (unsigned char) (header.width >> 16);
+    bmpinfoheader[7] = (unsigned char) (header.width >> 24);
+
+    bmpinfoheader[8] = (unsigned char) (header.height);
+    bmpinfoheader[9] = (unsigned char) (header.height >> 8);
+    bmpinfoheader[10] = (unsigned char) (header.height >> 16);
+    bmpinfoheader[11] = (unsigned char) (header.height >> 24);
+
+    bmpinfoheader[14] = (unsigned char) (header.bpp);
+    bmpinfoheader[15] = (unsigned char) (header.bpp >> 8);
+
+    bmpinfoheader[16] = (unsigned char) (header.compression);
+    bmpinfoheader[17] = (unsigned char) (header.compression >> 8);
+    bmpinfoheader[18] = (unsigned char) (header.compression >> 16);
+    bmpinfoheader[19] = (unsigned char) (header.compression >> 24);
+
+    bmpinfoheader[20] = (unsigned char) (header.imagesize);
+    bmpinfoheader[21] = (unsigned char) (header.imagesize >> 8);
+    bmpinfoheader[22] = (unsigned char) (header.imagesize >> 16);
+    bmpinfoheader[23] = (unsigned char) (header.imagesize >> 24);
+
+    bmpinfoheader[32] = (unsigned char) (header.colours);
+    bmpinfoheader[33] = (unsigned char) (header.colours >> 8);
+    bmpinfoheader[34] = (unsigned char) (header.colours >> 16);
+    bmpinfoheader[35] = (unsigned char) (header.colours >> 24);
+
+    bmpinfoheader[36] = (unsigned char) (header.impcolours);
+    bmpinfoheader[37] = (unsigned char) (header.impcolours >> 8);
+    bmpinfoheader[38] = (unsigned char) (header.impcolours >> 16);
+    bmpinfoheader[39] = (unsigned char) (header.impcolours >> 24);
+
+    fwrite (bmpinfoheader, 1, 40, file);
+
+    //pixel information
+    int i,j;
+    for (i = 0; i < header.height; i++){
+        for (j = 0; j < header.width; j++){
+            RGB rgb = rgb_matrix[i][j];
+            unsigned char color[3] = { (unsigned char) rgb.b, (unsigned char) rgb.g, (unsigned char) rgb.r };
+            fwrite(color, 1, 3, file);
+        }
+    }
+
+    fclose(file);
 }
