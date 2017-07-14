@@ -20,7 +20,7 @@
 #include "image.h"
 
 // Convert 1 RBG pixel to 1 YCC pixel
-ycc_matric rgb_to_ycc(rgb_matrix){
+ycc_matrix rgb_to_ycc(rgb_matrix){
     for(rows in image)
         for(columns in image)
             read r, g, b values
@@ -79,7 +79,6 @@ ycc_matrix ycc_upsample(ycc_matrix){
 
     return upsampled_ycc_matrix
 }
-
 
 int main(int argc, char **argv)
 {
