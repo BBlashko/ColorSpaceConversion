@@ -24,7 +24,6 @@ BMP_Header read_header_info(FILE* file)
 {
     BMP_Header info;
     char type[3];
-    unsigned short int bpp;
     fseek(file,0,0);
     fread(type,1,2,file);
     type[2] = '\0';
