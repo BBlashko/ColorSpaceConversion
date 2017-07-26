@@ -17,8 +17,6 @@ YCC** rgb_to_ycc(RGB** rgb_matrix, int width, int height){
     YCC ycc_pixel;
     RGB rgb_pixel;
 
-
-
     int i, j;
     for(i = 0; i < height; i++){
         for(j = 0; j < width; j++){
@@ -30,7 +28,6 @@ YCC** rgb_to_ycc(RGB** rgb_matrix, int width, int height){
             ycc_pixel.cb = 128 - (0.148*rgb_pixel.r) - (0.291*rgb_pixel.g) + (0.439*rgb_pixel.b);
             ycc_pixel.cr = 128 + (0.439*rgb_pixel.r) - (0.368*rgb_pixel.g) - (0.071*rgb_pixel.b);
 
-            // printf("%d %d\n", i, j);
             ycc_matrix[i][j] = ycc_pixel;
 
         }
@@ -109,15 +106,9 @@ meta_YCC** ycc_downsample(YCC** ycc_matrix, int width, int height){
     for(i = 0; i < height/2; i++){
         b = 0;
         for(j = 0; j < width/2; j++){
-            //printf("D: i: %d j: %d\n", i, j);
-
-            //printf("D: a: %d b: %d\n", a, b);
             ycc_pixel1 = ycc_matrix[a][b];
-            //printf("D: a: %d b: %d\n", a, b+1);
             ycc_pixel2 = ycc_matrix[a][b+1];
-            //printf("D: a: %d b: %d\n", a+1, b);
             ycc_pixel3 = ycc_matrix[a+1][b];
-            //printf("D: a: %d b: %d\n", a+1, b+1);
             ycc_pixel4 = ycc_matrix[a+1][b+1];
             
             meta_ycc_pixel = ycc_normal_to_meta(ycc_pixel1, ycc_pixel2, ycc_pixel3, ycc_pixel4);
@@ -132,29 +123,16 @@ meta_YCC** ycc_downsample(YCC** ycc_matrix, int width, int height){
 
 // Take in a YCC meta pixel and return the 4 YCC pixels
 ycc_array* ycc_meta_to_normal(meta_YCC meta_ycc_pixel, ycc_array *ycc_array){ 
-    //printf("2.1: %f\n", meta_ycc_pixel.y1);
-    ycc_array->ycc_pixel1.y = meta_ycc_pixel.y1;
-    //printf("ycc1: %f\n", ycc_array->ycc_pixel1.y);
-    
-    //printf("2.2: %f\n", meta_ycc_pixel.y2);
+    ycc_array->ycc_pixel1.y = meta_ycc_pixel.y1;    
     ycc_array->ycc_pixel2.y = meta_ycc_pixel.y2;
-    //printf("ycc2: %f\n", ycc_array->ycc_pixel2.y);
-    
-    //printf("2.3: %f\n", meta_ycc_pixel.y3);
     ycc_array->ycc_pixel3.y = meta_ycc_pixel.y3;
-    //printf("ycc3: %f\n", ycc_array->ycc_pixel3.y);
-    
-    //printf("2.4: %f\n", meta_ycc_pixel.y4);
     ycc_array->ycc_pixel4.y = meta_ycc_pixel.y4;
-    //printf("ycc4: %f\n", ycc_array->ycc_pixel4.y);
 
-    //printf("3\n");
     ycc_array->ycc_pixel1.cb = meta_ycc_pixel.cb;
     ycc_array->ycc_pixel2.cb = meta_ycc_pixel.cb;
     ycc_array->ycc_pixel3.cb = meta_ycc_pixel.cb;
     ycc_array->ycc_pixel4.cb = meta_ycc_pixel.cb;
 
-    //printf("4\n");
     ycc_array->ycc_pixel1.cr = meta_ycc_pixel.cr;
     ycc_array->ycc_pixel2.cr = meta_ycc_pixel.cr;
     ycc_array->ycc_pixel3.cr = meta_ycc_pixel.cr;
@@ -166,25 +144,20 @@ ycc_array* ycc_meta_to_normal(meta_YCC meta_ycc_pixel, ycc_array *ycc_array){
 // Upsample 1 Cr (or Cb) value to get 4 Cr (or Cb) values
 YCC** ycc_upsample(meta_YCC** ycc_matrix_downsampled, int width, int height){
     YCC** ycc_matrix_upsampled = allocate_ycc_matrix(width, height);
-    ycc_array *ycc_array1 = malloc(sizeof(ycc_array));
+    ycc_array *ycc_array1 = malloc(sizeof(ycc_array)*4);
 
     int i, j;
     int a = 0, b = 0;
     for(i = 0; i < height/2; i++){
         b = 0;
         for(j = 0; j < width/2; j++){
-            //printf("U: i: %d j: %d\n", i, j);
-            ycc_array *ycc_array2 = malloc(sizeof(ycc_array));
+            ycc_array *ycc_array2 = malloc(sizeof(ycc_array)*4);
             ycc_array1 = ycc_meta_to_normal(ycc_matrix_downsampled[i][j], ycc_array2);
             free(ycc_array2);
 
-            //printf("U: a: %d b: %d\n", a, b);
             ycc_matrix_upsampled[a][b] = ycc_array1->ycc_pixel1;
-            //printf("U: a: %d b: %d\n", a, b+1);
             ycc_matrix_upsampled[a][b+1] = ycc_array1->ycc_pixel2;
-            //printf("U: a: %d b: %d\n", a+1, b);
-            ycc_matrix_upsampled[a+1][b] = ycc_array1->ycc_pixel3;
-            //printf("U: a: %d b: %d\n", a+1, b+1);
+            ycc_matrix_upsampled[a+1][b] = ycc_array1->ycc_pixel3;;
             ycc_matrix_upsampled[a+1][b+1] = ycc_array1->ycc_pixel4;
 
             b += 2;
@@ -216,7 +189,6 @@ int main(int argc, char **argv)
     meta_YCC** ycc_matrix_downsampled = allocate_meta_ycc_matrix(image_info.width/2, image_info.height/2);
     YCC** ycc_matrix_upsampled = allocate_ycc_matrix(image_info.width, image_info.height);
 
-    // 700 x 467
     //printf("width: %d height: %d\n", image_info.width, image_info.height);
 
     //test pixel
@@ -240,6 +212,7 @@ int main(int argc, char **argv)
     save_YCC_image("trainYCC.bmp", image_info, ycc_matrix, 1);
     save_RGB_image("trainRGB.bmp", image_info, rgb_matrix2);
     save_YCC_image("trainDownUpYCC.bmp", image_info, ycc_matrix_upsampled, 0);
+    save_YCC_image("trainDownUpYCC.bmp", image_info, ycc_matrix_upsampled, 1);
     save_RGB_image("trainDownUpRGB.bmp", image_info, rgb_matrix3);
     fclose(file);
 
