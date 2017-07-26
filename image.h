@@ -30,6 +30,14 @@ typedef struct meta_YCC
     float cr;
 } meta_YCC;
 
+typedef struct ycc_array
+{
+    YCC ycc_pixel1;
+    YCC ycc_pixel2;
+    YCC ycc_pixel3;
+    YCC ycc_pixel4;
+} ycc_array;
+
 typedef struct
 {
     unsigned int filesize;
