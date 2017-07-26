@@ -41,6 +41,27 @@ YCC** allocate_ycc_matrix(int width, int height)
     return matrix;
 }
 
+//Allocates the memory for the image YCC meta pixel matrix
+meta_YCC** allocate_meta_ycc_matrix(int width, int height)
+{
+    meta_YCC** matrix;
+    int i;
+    matrix = (meta_YCC **) malloc (sizeof (meta_YCC*) * height);
+    if (matrix == NULL){
+        perror("[ERROR] No memory available for allocation of RGB matrix!");
+        exit(0);
+    }
+    for (i=0;i<height;i++){
+        matrix[i] = (meta_YCC *) malloc (sizeof(meta_YCC) * width);
+        if (matrix[i] == NULL){
+        perror("[Error] No more memory available for each RGB row allocation!");
+            exit(0);
+        }
+    }
+
+    return matrix;
+}
+
 
 BMP_Header read_header_info(FILE* file)
 {
@@ -129,7 +150,7 @@ void save_image_header(FILE* file, BMP_Header header) {
     bmpfileheader[4] = (unsigned char) (header.filesize >> 16);
     bmpfileheader[5] = (unsigned char) (header.filesize >> 24);
 
-    fwrite (bmpfileheader, 1, 14, file);
+    fwrite (bmpfileheader, sizeof(unsigned char), sizeof(bmpfileheader), file);
 
     //write info header
     unsigned char bmpinfoheader[40] = {40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 24, 0};

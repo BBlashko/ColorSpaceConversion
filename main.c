@@ -69,28 +69,58 @@ RGB** ycc_to_rgb(YCC** ycc_matrix, int width, int height){
     return rgb_matrix;
 }
 
-/*// Downsample 4 ycc pixels into 1
-YCC** ycc_downsample(YCC** ycc_matrix){
-    YCC** ycc_matrix_downsampled = allocate_ycc_matrix(image_info.width/4, image_info.height/4);
-    for(int i = 0; i < image_info.width/4; i++){
-        for(int j = 0; j < image_info.height/4; j++){
-            ycc_matrix_downsampled[i][j]->y = ycc
+meta_YCC** ycc_downsample(YCC** ycc_matrix, int width, int height){
+    meta_YCC** ycc_matrix_downsampled = allocate_meta_ycc_matrix(width/4, height/4);
+    YCC ycc_pixel1, ycc_pixel2, ycc_pixel3, ycc_pixel4;
 
-            ycc_matrix->y1 = ycc_pixel1->y;
-            ycc_matrix->y2 = ycc_pixel2->y;
-            ycc_matrix->y3 = ycc_pixel3->y;
-            ycc_matrix->y4 = ycc_pixel4->y;
+    int i, j;
+    int a = 0, b = 0;
+    for(i = 0; i < height/4; i++){
+        for(j = 0; j < height/4; j++){
+            ycc_pixel1 = ycc_matrix[a][b];
+            ycc_pixel2 = ycc_matrix[a][b+1];
+            ycc_pixel3 = ycc_matrix[a+1][b];
+            ycc_pixel4 = ycc_matrix[a+1][b+1];
 
-            // Average the cb components
-            ycc_matrix->cb = (ycc_pixel1->cb + ... + ycc_pixel4->cb)/4
-
-            // Average the cr components
-            ycc_matrix->cr = (ycc_matrix->cr1 + ... + ycc_matrix->cb4)/4
-
-    return downsampled_ycc_matrix
+            ycc_matrix_downsampled[i][j] = (meta_YCC)ycc_meta_pixel(ycc_pixel1, ycc_pixel2, ycc_pixel3, ycc_pixel4);
+            a += 2;
+            b += 2;
+        }
+    }
+    return ycc_matrix_downsampled;
 }
 
-// Upsample 1 Cr (or Cb) value to get 4 Cr (or Cb) values
+// Downsample 4 ycc pixels into 1 meta ycc pixel
+meta_YCC ycc_meta_pixel(YCC ycc_pixel1, YCC ycc_pixel2, YCC ycc_pixel3, YCC ycc_pixel4){
+    meta_YCC meta_ycc;
+    float cb_avg, cr_avg;
+
+    meta_ycc.y1 = ycc_pixel1.y;
+    cb_avg += ycc_pixel1.cb;
+    cr_avg += ycc_pixel1.cr;
+
+    meta_ycc.y2 = ycc_pixel2.y;
+    cb_avg += ycc_pixel2.cb;
+    cr_avg += ycc_pixel2.cr;
+
+    meta_ycc.y3 = ycc_pixel3.y;
+    cb_avg += ycc_pixel3.cb;
+    cr_avg += ycc_pixel3.cr;
+
+    meta_ycc.y4 = ycc_pixel4.y;
+    cb_avg += ycc_pixel4.cb;
+    cr_avg += ycc_pixel4.cr;       
+
+    // Average the cb components
+    meta_ycc.cb = cb_avg/4;
+
+    // Average the cr components                        
+    meta_ycc.cr = cr_avg/4;
+
+    return meta_ycc;
+}
+
+/*// Upsample 1 Cr (or Cb) value to get 4 Cr (or Cb) values
 ycc_matrix ycc_upsample(ycc_matrix){
     for(rows in image)
         for(columns in image)

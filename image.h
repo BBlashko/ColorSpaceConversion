@@ -20,6 +20,16 @@ typedef struct YCC
     float cr;
 } YCC;
 
+typedef struct meta_YCC
+{
+    float y1;
+    float y2;
+    float y3;
+    float y4;
+    float cb;
+    float cr;
+} meta_YCC;
+
 typedef struct
 {
     unsigned int filesize;
@@ -34,6 +44,7 @@ typedef struct
 
 RGB** allocate_rbg_matrix(int width, int height);
 YCC** allocate_ycc_matrix(int width, int height);
+meta_YCC** allocate_meta_ycc_matrix(int width, int height);
 BMP_Header read_header_info(FILE* file);
 RGB** load_image(FILE* file, int width, int height);
 void save_image_header(FILE* file, BMP_Header header);
