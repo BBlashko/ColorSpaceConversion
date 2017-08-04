@@ -106,7 +106,7 @@ meta_YCC** rgb_to_ycc(RGB** rgb_matrix, YCC_Data ycc_data){
     return ycc_matrix_downsampled;
 }
 
-uint8_t clip(int in){
+inline uint8_t clip(int in){
     return (uint8_t) (in > 255 ? 255 : (in < 0 ? 0 : in));
 }
 
@@ -188,32 +188,33 @@ int main(int argc, char **argv)
     RGB_Data image_rgb_data = load_image(file, image_info.width, image_info.height);
 
     //Convert RGB -> YCC meta data
-    printf("Converting RGB matrix to YCC matrix, and performing a downsampling\n");
+    //printf("Converting RGB matrix to YCC matrix, and performing a downsampling\n");
     YCC_Data ycc_data = allocate_ycc_data(image_info.width, image_info.height);
     meta_YCC** ycc_matrix_downsampled = rgb_to_ycc(image_rgb_data.rgb_matrix, ycc_data);
 
     ////////////////////////////////////////////////////////////////////////////
     //Comment if YCC downsampled images are not needed
     ////////////////////////////??//////////////////////////////////////////////
-    int height = image_info.height >> 1;
+    /*int height = image_info.height >> 1;
     int width = image_info.width >> 1;
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
+    int i, j;
+    for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j++) {
             ycc_data.ycc_matrix[i][j].y = ycc_matrix_downsampled[i][j].y1;
             ycc_data.ycc_matrix[i][j].cb = ycc_matrix_downsampled[i][j].cb;
             ycc_data.ycc_matrix[i][j].cr = ycc_matrix_downsampled[i][j].cr;
         }
-    }
-    save_YCC_image("trainYCC.bmp", image_info, ycc_data, 1);
+    }*/
+    //save_YCC_image("trainYCC.bmp", image_info, ycc_data, 1);
     ////////////////////////////////////////////////////////////////////////////
 
     //Convert YCC meta data -> RGB pixel matrix
-    printf("Converting YCC downsampled meta data matrix to RGB pixel matrix\n");
+    //printf("Converting YCC downsampled meta data matrix to RGB pixel matrix\n");
     RGB_Data rgb_data = allocate_rgb_data(image_info.width, image_info.height);
     ycc_to_rgb(ycc_matrix_downsampled, rgb_data);
 
     //output RGB matrix to a file.
-    save_RGB_image("trainRGB.bmp", image_info, rgb_data.rgb_matrix);
+    //save_RGB_image("trainRGB.bmp", image_info, rgb_data.rgb_matrix);
     fclose(file);
 
     free(image_rgb_data.rgb_matrix);
