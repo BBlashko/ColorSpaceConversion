@@ -182,23 +182,21 @@ int main(int argc, char **argv)
     image_info = read_header_info(file);
     RGB** rgb_matrix = load_image(file, image_info.width, image_info.height);
     RGB** rgb_matrix2 = allocate_rgb_matrix(file, image_info.width, image_info.height);
-    RGB** rgb_matrix3 = allocate_rgb_matrix(file, image_info.width, image_info.height);
     YCC** ycc_matrix = allocate_ycc_matrix(image_info.width, image_info.height);
     meta_YCC** ycc_matrix_downsampled = allocate_meta_ycc_matrix(image_info.width/2, image_info.height/2);
     YCC** ycc_matrix_upsampled = allocate_ycc_matrix(image_info.width, image_info.height);
 
     // Convert to YCC
     ycc_matrix = rgb_to_ycc(rgb_matrix, image_info.width, image_info.height);
-    rgb_matrix2 = ycc_to_rgb(ycc_matrix, image_info.width, image_info.height);
 
     // downsample and upsample
     ycc_matrix_downsampled = ycc_downsample(ycc_matrix, image_info.width, image_info.height);
     ycc_matrix_upsampled = ycc_upsample(ycc_matrix_downsampled, image_info.width, image_info.height);
 
     // Convert back to RGB
-    rgb_matrix3 = ycc_to_rgb(ycc_matrix_upsampled, image_info.width, image_info.height);
+    rgb_matrix2 = ycc_to_rgb(ycc_matrix_upsampled, image_info.width, image_info.height);
     
-    //save_RGB_image("trainRGB.bmp", image_info, rgb_matrix3);
+    //save_RGB_image("trainRGB.bmp", image_info, rgb_matrix2);
     fclose(file);
 
     free(rgb_matrix);
