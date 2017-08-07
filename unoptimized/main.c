@@ -32,12 +32,9 @@ YCC** rgb_to_ycc(RGB** rgb_matrix, int width, int height){
 
         }
     }
-    printf("%u %u %u\n", rgb_matrix[0][0].r, rgb_matrix[0][0].g, rgb_matrix[0][0].b);
-    printf("%lf %lf %lf\n", ycc_matrix[0][0].y, ycc_matrix[0][0].cb, ycc_matrix[0][0].cr);
     return ycc_matrix;
 }
 
-//TODO reformat this!
 int clip(float in){
     if(in > 255) return 255;
     else if(in < 0) return 0;
@@ -186,38 +183,22 @@ int main(int argc, char **argv)
     RGB** rgb_matrix = load_image(file, image_info.width, image_info.height);
     RGB** rgb_matrix2 = allocate_rgb_matrix(file, image_info.width, image_info.height);
     RGB** rgb_matrix3 = allocate_rgb_matrix(file, image_info.width, image_info.height);
-    // YCC** ycc_matrix = allocate_ycc_matrix(image_info.width, image_info.height);
-    //
-    // meta_YCC** ycc_matrix_downsampled = allocate_meta_ycc_matrix(image_info.width/2, image_info.height/2);
-    // YCC** ycc_matrix_upsampled = allocate_ycc_matrix(image_info.width, image_info.height);
+    YCC** ycc_matrix = allocate_ycc_matrix(image_info.width, image_info.height);
+    meta_YCC** ycc_matrix_downsampled = allocate_meta_ycc_matrix(image_info.width/2, image_info.height/2);
+    YCC** ycc_matrix_upsampled = allocate_ycc_matrix(image_info.width, image_info.height);
 
-    //printf("width: %d height: %d\n", image_info.width, image_info.height);
-
-    //test pixel
-    //printf("%d %d %d\n", pixel_matrix[0][0].r, pixel_matrix[0][0].g, pixel_matrix[0][0].b);
-
-    printf("Converting RGB matrix to YCC matrix\n");
-    YCC** ycc_matrix = rgb_to_ycc(rgb_matrix, image_info.width, image_info.height);
-    // printf("%d %d %d\n", ycc_matrix[0][0].y, ycc_matrix[0][0].cb, ycc_matrix[0][0].cr);
-
-    printf("Converting YCC matrix to RGB matrix\n");
+    // Convert to YCC
+    ycc_matrix = rgb_to_ycc(rgb_matrix, image_info.width, image_info.height);
     rgb_matrix2 = ycc_to_rgb(ycc_matrix, image_info.width, image_info.height);
-    printf("%u %u %u\n", rgb_matrix2[0][0].r, rgb_matrix2[0][0].g, rgb_matrix2[0][0].b);
 
-    // printf("Downsampling\n");
-    // ycc_matrix_downsampled = ycc_downsample(ycc_matrix, image_info.width, image_info.height);
-    //
-    // printf("Upsampling\n");
-    // ycc_matrix_upsampled = ycc_upsample(ycc_matrix_downsampled, image_info.width, image_info.height);
-    //
-    // printf("Converting YCC upsampled to RGB\n");
-    // rgb_matrix3 = ycc_to_rgb(ycc_matrix_upsampled, image_info.width, image_info.height);
-    //
-    // save_YCC_image("trainYCC.bmp", image_info, ycc_matrix, 1);
-    // save_RGB_image("trainRGB.bmp", image_info, rgb_matrix2);
-    // save_YCC_image("trainDownUpYCC.bmp", image_info, ycc_matrix_upsampled, 0);
-    // save_YCC_image("trainDownUpYCC.bmp", image_info, ycc_matrix_upsampled, 1);
-    // save_RGB_image("trainDownUpRGB.bmp", image_info, rgb_matrix3);
+    // downsample and upsample
+    ycc_matrix_downsampled = ycc_downsample(ycc_matrix, image_info.width, image_info.height);
+    ycc_matrix_upsampled = ycc_upsample(ycc_matrix_downsampled, image_info.width, image_info.height);
+
+    // Convert back to RGB
+    rgb_matrix3 = ycc_to_rgb(ycc_matrix_upsampled, image_info.width, image_info.height);
+    
+    //save_RGB_image("trainRGB.bmp", image_info, rgb_matrix3);
     fclose(file);
 
     free(rgb_matrix);
