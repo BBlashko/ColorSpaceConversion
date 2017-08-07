@@ -188,7 +188,6 @@ int main(int argc, char **argv)
     RGB_Data image_rgb_data = load_image(file, image_info.width, image_info.height);
 
     //Convert RGB -> YCC meta data
-    //printf("Converting RGB matrix to YCC matrix, and performing a downsampling\n");
     YCC_Data ycc_data = allocate_ycc_data(image_info.width, image_info.height);
     meta_YCC** ycc_matrix_downsampled = rgb_to_ycc(image_rgb_data.rgb_matrix, ycc_data);
 
@@ -209,7 +208,6 @@ int main(int argc, char **argv)
     ////////////////////////////////////////////////////////////////////////////
 
     //Convert YCC meta data -> RGB pixel matrix
-    //printf("Converting YCC downsampled meta data matrix to RGB pixel matrix\n");
     RGB_Data rgb_data = allocate_rgb_data(image_info.width, image_info.height);
     ycc_to_rgb(ycc_matrix_downsampled, rgb_data);
 
