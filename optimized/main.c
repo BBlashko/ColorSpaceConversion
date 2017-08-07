@@ -10,29 +10,6 @@
 #include <stdint.h>
 #include "image.h"
 
-//Factor value (2^16)
-#define R_Y_FACTOR 16843
-#define G_Y_FACTOR 33030
-#define B_Y_FACTOR 6423
-
-#define R_CB_FACTOR -9699
-#define G_CB_FACTOR -19071
-#define B_CB_FACTOR 28770
-
-#define R_CR_FACTOR 28770
-#define G_CR_FACTOR -24117
-#define B_CR_FACTOR -4653
-
-//Division shift FP factor RGB -> YCC
-#define YCC_RGB_BITSHIFT 16
-
-//YCC to RGB factors (2^16)
-#define Y_R_FACTOR 76284
-#define CR_R_FACTOR 104595
-#define CR_G_FACTOR 53281
-#define CB_G_FACTOR 25625
-#define CB_B_FACTOR 132252
-
 /* Main Functionality */
 // Convert 1 RBG pixel to 1 YCC pixel, storing that YCC pixel in a YCC matrix
 meta_YCC** rgb_to_ycc(RGB** rgb_matrix, YCC_Data ycc_data){
@@ -44,6 +21,22 @@ meta_YCC** rgb_to_ycc(RGB** rgb_matrix, YCC_Data ycc_data){
 
     register uint8_t r, g, b;
     int cb, cr = 0;
+
+    //Division shift FP factor RGB -> YCC
+    const uint8_t ycc_rgb_bitshift = 16;
+
+    //Factor value (2^16)
+    const int32_t r_y_factor = 16843;
+    const int32_t g_y_factor = 33030;
+    const int32_t b_y_factor = 6423;
+
+    const int32_t r_cb_factor = -9699;
+    const int32_t g_cb_factor = -19071;
+    const int32_t b_cb_factor = 28770;
+
+    const int32_t r_cr_factor = 28770;
+    const int32_t g_cr_factor = -24117;
+    const int32_t b_cr_factor = -4653;
 
     unsigned int row, next_row, col, next_col = 0;
     unsigned int i, j;
@@ -61,9 +54,9 @@ meta_YCC** rgb_to_ycc(RGB** rgb_matrix, YCC_Data ycc_data){
             b = rgb_matrix[row][col].b;
 
             //convert to YCC and add for downsampling
-            ycc_matrix_downsampled[i][j].y1 = 16 +  (((R_Y_FACTOR * r) + (G_Y_FACTOR * g) + (B_Y_FACTOR * b)) >> YCC_RGB_BITSHIFT);
-            cb += (((R_CB_FACTOR * r) + (G_CB_FACTOR * g) + (B_CB_FACTOR * b)) >> YCC_RGB_BITSHIFT);
-            cr += (((R_CR_FACTOR * r) + (G_CR_FACTOR * g) + (B_CR_FACTOR * b)) >> YCC_RGB_BITSHIFT);
+            ycc_matrix_downsampled[i][j].y1 = 16 +  (((r_y_factor * r) + (g_y_factor * g) + (b_y_factor * b)) >> ycc_rgb_bitshift);
+            cb += (((r_cb_factor * r) + (g_cb_factor * g) + (b_cb_factor * b)) >> ycc_rgb_bitshift);
+            cr += (((r_cr_factor * r) + (g_cr_factor * g) + (b_cr_factor * b)) >> ycc_rgb_bitshift);
 
             // Convert that RGB pixel to YCC and write to the YCC matrix
             r = rgb_matrix[row][next_col].r;
@@ -71,9 +64,9 @@ meta_YCC** rgb_to_ycc(RGB** rgb_matrix, YCC_Data ycc_data){
             b = rgb_matrix[row][next_col].b;
 
             //convert to YCC and add for downsampling
-            ycc_matrix_downsampled[i][j].y2 = 16 + (((R_Y_FACTOR * r) + (G_Y_FACTOR * g) + (B_Y_FACTOR * b)) >> YCC_RGB_BITSHIFT);
-            cb += (((R_CB_FACTOR * r) + (G_CB_FACTOR * g) + (B_CB_FACTOR * b)) >> YCC_RGB_BITSHIFT);
-            cr += (((R_CR_FACTOR * r) + (G_CR_FACTOR * g) + (B_CR_FACTOR * b)) >> YCC_RGB_BITSHIFT);
+            ycc_matrix_downsampled[i][j].y2 = 16 + (((r_y_factor * r) + (g_y_factor * g) + (b_y_factor * b)) >> ycc_rgb_bitshift);
+            cb += (((r_cb_factor * r) + (g_cb_factor * g) + (b_cb_factor * b)) >> ycc_rgb_bitshift);
+            cr += (((r_cr_factor * r) + (g_cr_factor * g) + (b_cr_factor * b)) >> ycc_rgb_bitshift);
 
             // Convert that RGB pixel to YCC and write to the YCC matrix
             r = rgb_matrix[next_row][col].r;
@@ -81,9 +74,9 @@ meta_YCC** rgb_to_ycc(RGB** rgb_matrix, YCC_Data ycc_data){
             b = rgb_matrix[next_row][col].b;
 
             //convert to YCC and add for downsampling
-            ycc_matrix_downsampled[i][j].y3 = 16 + (((R_Y_FACTOR * r) + (G_Y_FACTOR * g) + (B_Y_FACTOR * b)) >> YCC_RGB_BITSHIFT);
-            cb += (((R_CB_FACTOR * r) + (G_CB_FACTOR * g) + (B_CB_FACTOR * b)) >> YCC_RGB_BITSHIFT);
-            cr += (((R_CR_FACTOR * r) + (G_CR_FACTOR * g) + (B_CR_FACTOR * b)) >> YCC_RGB_BITSHIFT);
+            ycc_matrix_downsampled[i][j].y3 = 16 + (((r_y_factor * r) + (g_y_factor * g) + (b_y_factor * b)) >> ycc_rgb_bitshift);
+            cb += (((r_cb_factor * r) + (g_cb_factor * g) + (b_cb_factor * b)) >> ycc_rgb_bitshift);
+            cr += (((r_cr_factor * r) + (g_cr_factor * g) + (b_cr_factor * b)) >> ycc_rgb_bitshift);
 
             // Convert that RGB pixel to YCC and write to the YCC matrix
             r = rgb_matrix[next_row][next_col].r;
@@ -91,9 +84,9 @@ meta_YCC** rgb_to_ycc(RGB** rgb_matrix, YCC_Data ycc_data){
             b = rgb_matrix[next_row][next_col].b;
 
             //convert to YCC and add for downsampling
-            ycc_matrix_downsampled[i][j].y4 = 16 + (((R_Y_FACTOR * r) + (G_Y_FACTOR * g) + (B_Y_FACTOR * b)) >> YCC_RGB_BITSHIFT);
-            cb += (((R_CB_FACTOR * r) + (G_CB_FACTOR * g) + (B_CB_FACTOR * b)) >> YCC_RGB_BITSHIFT);
-            cr += (((R_CR_FACTOR * r) + (G_CR_FACTOR * g) + (B_CR_FACTOR * b)) >> YCC_RGB_BITSHIFT);
+            ycc_matrix_downsampled[i][j].y4 = 16 + (((r_y_factor * r) + (g_y_factor * g) + (b_y_factor * b)) >> ycc_rgb_bitshift);
+            cb += (((r_cb_factor * r) + (g_cb_factor * g) + (b_cb_factor * b)) >> ycc_rgb_bitshift);
+            cr += (((r_cr_factor * r) + (g_cr_factor * g) + (b_cr_factor * b)) >> ycc_rgb_bitshift);
 
             //Downsample (average the YCC values of a 2x2 pixel matrix to a single pixel)
       			cb = cb >> 2;
@@ -106,7 +99,7 @@ meta_YCC** rgb_to_ycc(RGB** rgb_matrix, YCC_Data ycc_data){
     return ycc_matrix_downsampled;
 }
 
-inline uint8_t clip(int in){
+static inline uint8_t clip(int in){
     return (uint8_t) (in > 255 ? 255 : (in < 0 ? 0 : in));
 }
 
@@ -120,6 +113,17 @@ void ycc_to_rgb(meta_YCC** meta_ycc_pixel, RGB_Data rgb_data){
     YCC ycc_pixel2;
     YCC ycc_pixel3;
     YCC ycc_pixel4;
+
+    //Division shift FP factor RGB -> YCC
+    const uint8_t ycc_rgb_bitshift = 16;
+
+    //YCC to RGB factors (2^16)
+    const int32_t r_r_factor = 76284;
+    const int32_t cr_r_factor = 104595;
+    const int32_t cr_g_factor = 53281;
+    const int32_t cb_g_factor = 25625;
+    const int32_t cb_b_factor = 132252;
+
     unsigned int row, next_row, col, next_col = 0;
     int i, j;
     for(i = 0; i < height; i++){
@@ -145,28 +149,28 @@ void ycc_to_rgb(meta_YCC** meta_ycc_pixel, RGB_Data rgb_data){
             ycc_pixel4.cb = meta_ycc_pixel[i][j].cb;
             ycc_pixel4.cr = meta_ycc_pixel[i][j].cr;
 
-            int y1 = Y_R_FACTOR * (ycc_pixel1.y - 16);
-            int y2 = Y_R_FACTOR * (ycc_pixel2.y - 16);
-            int y3 = Y_R_FACTOR * (ycc_pixel3.y - 16);
-            int y4 = Y_R_FACTOR * (ycc_pixel4.y - 16);
+            int y1 = r_r_factor * (ycc_pixel1.y - 16);
+            int y2 = r_r_factor * (ycc_pixel2.y - 16);
+            int y3 = r_r_factor * (ycc_pixel3.y - 16);
+            int y4 = r_r_factor * (ycc_pixel4.y - 16);
 
             // Convert each YCC pixel to RGB
             // Must perform clipping to ensure saturation
-            rgb_matrix[row][col].r = clip((y1 + CR_R_FACTOR * (ycc_pixel1.cr - 128)) >>  YCC_RGB_BITSHIFT);
-            rgb_matrix[row][col].g = clip((y1 - CR_G_FACTOR * (ycc_pixel1.cr - 128) - CB_G_FACTOR * (ycc_pixel1.cb - 128)) >>  YCC_RGB_BITSHIFT);
-            rgb_matrix[row][col].b = clip((y1 + CB_B_FACTOR * (ycc_pixel1.cb - 128)) >>  YCC_RGB_BITSHIFT);
+            rgb_matrix[row][col].r = clip((y1 + cr_r_factor * (ycc_pixel1.cr - 128)) >>  ycc_rgb_bitshift);
+            rgb_matrix[row][col].g = clip((y1 - cr_g_factor * (ycc_pixel1.cr - 128) - cb_g_factor * (ycc_pixel1.cb - 128)) >>  ycc_rgb_bitshift);
+            rgb_matrix[row][col].b = clip((y1 + cb_b_factor * (ycc_pixel1.cb - 128)) >>  ycc_rgb_bitshift);
 
-            rgb_matrix[row][next_col].r = clip((y2 + CR_R_FACTOR * (ycc_pixel2.cr - 128)) >>  YCC_RGB_BITSHIFT);
-            rgb_matrix[row][next_col].g = clip((y2 - CR_G_FACTOR * (ycc_pixel2.cr - 128) - CB_G_FACTOR * (ycc_pixel2.cb - 128)) >>  YCC_RGB_BITSHIFT);
-            rgb_matrix[row][next_col].b = clip((y2 + CB_B_FACTOR * (ycc_pixel2.cb - 128)) >>  YCC_RGB_BITSHIFT);
+            rgb_matrix[row][next_col].r = clip((y2 + cr_r_factor * (ycc_pixel2.cr - 128)) >>  ycc_rgb_bitshift);
+            rgb_matrix[row][next_col].g = clip((y2 - cr_g_factor * (ycc_pixel2.cr - 128) - cb_g_factor * (ycc_pixel2.cb - 128)) >>  ycc_rgb_bitshift);
+            rgb_matrix[row][next_col].b = clip((y2 + cb_b_factor * (ycc_pixel2.cb - 128)) >>  ycc_rgb_bitshift);
 
-            rgb_matrix[next_row][col].r = clip((y3 + CR_R_FACTOR * (ycc_pixel3.cr - 128)) >>  YCC_RGB_BITSHIFT);
-            rgb_matrix[next_row][col].g = clip((y3 - CR_G_FACTOR * (ycc_pixel3.cr - 128) - CB_G_FACTOR * (ycc_pixel3.cb - 128)) >>  YCC_RGB_BITSHIFT);
-            rgb_matrix[next_row][col].b = clip((y3 + CB_B_FACTOR * (ycc_pixel3.cb - 128)) >>  YCC_RGB_BITSHIFT);
+            rgb_matrix[next_row][col].r = clip((y3 + cr_r_factor * (ycc_pixel3.cr - 128)) >>  ycc_rgb_bitshift);
+            rgb_matrix[next_row][col].g = clip((y3 - cr_g_factor * (ycc_pixel3.cr - 128) - cb_g_factor * (ycc_pixel3.cb - 128)) >>  ycc_rgb_bitshift);
+            rgb_matrix[next_row][col].b = clip((y3 + cb_b_factor * (ycc_pixel3.cb - 128)) >>  ycc_rgb_bitshift);
 
-            rgb_matrix[next_row][next_col].r = clip((y4 + CR_R_FACTOR * (ycc_pixel4.cr - 128)) >>  YCC_RGB_BITSHIFT);
-            rgb_matrix[next_row][next_col].g = clip((y4 - CR_G_FACTOR * (ycc_pixel4.cr - 128) - CB_G_FACTOR * (ycc_pixel4.cb - 128)) >>  YCC_RGB_BITSHIFT);
-            rgb_matrix[next_row][next_col].b = clip((y4 + CB_B_FACTOR * (ycc_pixel4.cb - 128)) >>  YCC_RGB_BITSHIFT);
+            rgb_matrix[next_row][next_col].r = clip((y4 + cr_r_factor * (ycc_pixel4.cr - 128)) >>  ycc_rgb_bitshift);
+            rgb_matrix[next_row][next_col].g = clip((y4 - cr_g_factor * (ycc_pixel4.cr - 128) - cb_g_factor * (ycc_pixel4.cb - 128)) >>  ycc_rgb_bitshift);
+            rgb_matrix[next_row][next_col].b = clip((y4 + cb_b_factor * (ycc_pixel4.cb - 128)) >>  ycc_rgb_bitshift);
         }
     }
     rgb_data.rgb_matrix = rgb_matrix;
@@ -212,7 +216,7 @@ int main(int argc, char **argv)
     ycc_to_rgb(ycc_matrix_downsampled, rgb_data);
 
     //output RGB matrix to a file.
-    //save_RGB_image("trainRGB.bmp", image_info, rgb_data.rgb_matrix);
+    save_RGB_image("trainRGB.bmp", image_info, rgb_data.rgb_matrix);
     fclose(file);
 
     free(image_rgb_data.rgb_matrix);
