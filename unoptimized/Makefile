@@ -1,6 +1,6 @@
 CC = gcc
 SRCS = image.c
-CFLAGS  = -g -pg -O3
+CFLAGS  = -g
 TARGET = main
 
 all: $(TARGET)

@@ -196,7 +196,7 @@ int main(int argc, char **argv)
     // Convert back to RGB
     rgb_matrix2 = ycc_to_rgb(ycc_matrix_upsampled, image_info.width, image_info.height);
     
-    //save_RGB_image("trainRGB.bmp", image_info, rgb_matrix2);
+    save_RGB_image("trainRGB.bmp", image_info, rgb_matrix2);
     fclose(file);
 
     free(rgb_matrix);
